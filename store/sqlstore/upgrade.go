@@ -1349,6 +1349,8 @@ func upgradeDatabaseToVersion600(sqlStore *SqlStore) {
 		sqlStore.AlterColumnTypeIfExists("Posts", "FileIds", "text", "varchar(300)")
 	}
 
+	sqlStore.CreateCompositeIndexIfNotExists("idx_jobs_status_type", "Jobs", []string{"Status", "Type"})
+
 	// saveSchemaVersion(sqlStore, Version600)
 	// }
 }
