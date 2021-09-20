@@ -48,6 +48,18 @@ func Setup(tb testing.TB) *TestHelper {
 	return setupTestHelper(dbStore, tb)
 }
 
+func SetupCloud(tb testing.TB) *TestHelper {
+	if testing.Short() {
+		tb.SkipNow()
+	}
+	dbStore := mainHelper.GetStore()
+	dbStore.DropAllTables()
+	dbStore.MarkSystemRanUnitTests()
+	mainHelper.PreloadMigrations()
+
+	return setupTestHelper(dbStore, tb, "Cloud")
+}
+
 func SetupWithStoreMock(tb testing.TB) *TestHelper {
 	mockStore := testlib.GetMockStoreForSetupFunctions()
 	th := setupTestHelper(mockStore, tb)
@@ -63,7 +75,7 @@ func SetupWithStoreMock(tb testing.TB) *TestHelper {
 	return th
 }
 
-func setupTestHelper(s store.Store, tb testing.TB) *TestHelper {
+func setupTestHelper(s store.Store, tb testing.TB, features ...string) *TestHelper {
 	tempWorkspace, err := ioutil.TempDir("", "userservicetest")
 	if err != nil {
 		panic(err)
@@ -89,7 +101,7 @@ func setupTestHelper(s store.Store, tb testing.TB) *TestHelper {
 	*config.PasswordSettings.Number = false
 	configStore.Set(config)
 
-	licenseFn := func() *model.License { return model.NewTestLicense() }
+	licenseFn := func() *model.License { return model.NewTestLicense(features...) }
 
 	us, err := users.New(users.ServiceConfig{
 		UserStore:    s.User(),

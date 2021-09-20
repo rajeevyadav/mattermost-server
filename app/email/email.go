@@ -591,13 +591,18 @@ func (es *Service) NewEmailTemplateData(locale string) templates.Data {
 		organization = localT("api.templates.email_organization") + *es.config().EmailSettings.FeedbackOrganization
 	}
 
+	supportEmail := *es.config().SupportSettings.SupportEmail
+	if supportEmail == "" && *es.license().Features.Cloud {
+		supportEmail = " feedback-cloud@mattermost.com"
+	}
+
 	return templates.Data{
 		Props: map[string]interface{}{
 			"EmailInfo1": localT("api.templates.email_info1"),
 			"EmailInfo2": localT("api.templates.email_info2"),
 			"EmailInfo3": localT("api.templates.email_info3",
 				map[string]interface{}{"SiteName": es.config().TeamSettings.SiteName}),
-			"SupportEmail": *es.config().SupportSettings.SupportEmail,
+			"SupportEmail": supportEmail,
 			"Footer":       localT("api.templates.email_footer"),
 			"FooterV2":     localT("api.templates.email_footer_v2"),
 			"Organization": organization,
